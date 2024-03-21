@@ -1,0 +1,23 @@
+[package]
+name = "bkswap"
+version = "0.1.0"
+description = "Created with Anchor"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "bkswap"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = { git = "https://github.com/coral-xyz/anchor", tag = "v0.26.0", version = "0.26.0", package = "anchor-lang" }
+spl-token = { version = "~3.5.0", features = ["no-entrypoint"] }
+anchor-spl = { git = "https://github.com/coral-xyz/anchor", tag = "v0.26.0", version = "0.26.0", package = "anchor-spl" }
+solana-program = "=1.17.5"
+ahash = "=0.8.6"

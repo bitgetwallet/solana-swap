@@ -1,0 +1,13 @@
+[package]
+name = "raydium-contract-instructions"
+version = "0.1.0"
+edition = "2021"
+
+
+[dependencies]
+solana-program = "=1.17.5"
+ahash = "=0.8.6"
+spl-token = { version="~3.5.0", features = [ "no-entrypoint" ] }
+num-derive = "0.3"
+num-traits = "0.2.12"
+thiserror = "1.0.20"
