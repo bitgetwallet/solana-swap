@@ -1,0 +1,40 @@
+[toolchain]
+
+[features]
+seeds = false
+skip-lint = false
+
+[programs.devnet]
+bkswap = "5oah7zWWknX7KjWHDZrca9f53HX5WxNUp3y9p6gJMyU3"
+bkswap_solana = "8tZzuvm3bm12BqdFYgbSYm13afNdUbrYbCsm96yhxpC7"
+raydium_extra_router = "DGumNmyMhSeuNYsJLWD7VELLoENEenp99pTtDqSR9dUy"
+raydium-router = "FG3crHWbxsC1RXaYNn76bJjp7rYz7EbQBNKQqnsV9Mrq"
+bkswapv2 = "83KU9Mc8US5bZGLjmt5LVbpCRy6UrStazz7P6LZYKYGN"
+
+[programs.localnet]
+bkswap_solana = "8tZzuvm3bm12BqdFYgbSYm13afNdUbrYbCsm96yhxpC7"
+raydium-router = "FG3crHWbxsC1RXaYNn76bJjp7rYz7EbQBNKQqnsV9Mrq"
+raydium-clmm-router = "2QSbPkU9N8wVesAua1sh1Aip7fM9EBUrBdNFuQDjcxYo"
+raydium-cp-swap-router = "HU1a8zgV4jddrrwmB9puyjDJum7nvGsfc5WuU3ypy8fk"
+raydium-stable-amm-router = "BbGtVpxFAFMRRTjgNt4BBhZoi1QYV2B24UezCUdp21A3"
+
+
+[programs.mainnet]
+bkswap = "3Hy9MBHowHUmhmSP1KahEvvtC8e6DxzLGeFjuiBQwRUA"
+raydium-router = "FG3crHWbxsC1RXaYNn76bJjp7rYz7EbQBNKQqnsV9Mrq"
+raydium-cp-swap-router = "HU1a8zgV4jddrrwmB9puyjDJum7nvGsfc5WuU3ypy8fk"
+raydium-clmm-router = "2QSbPkU9N8wVesAua1sh1Aip7fM9EBUrBdNFuQDjcxYo"
+bkswapv2 = "2o1ApYA73aQr6EZgdDFSAhd2c9XFPp6uKuy7B5skvbsn"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+# cluster = "Localnet"
+cluster = "mainnet"
+# cluster = "devnet"
+# cluster = "testnet"
+wallet = "/Users/user-name/.config/solana/id-8F.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

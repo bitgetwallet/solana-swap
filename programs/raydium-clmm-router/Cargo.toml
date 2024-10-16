@@ -1,0 +1,30 @@
+[package]
+name = "raydium-clmm-router"
+version = "0.1.0"
+description = "Created with Anchor"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "raydium_clmm_router"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+solana-program = ">=1.16, <1.18"
+anchor-lang = "=0.29.0"
+anchor-spl = "=0.29.0"
+spl-memo = "=4.0.0"
+ahash = "=0.8.6"
+spl-token = "=4.0.0" 
+
+raydium-amm-v3 = { git = "https://github.com/raydium-io/raydium-clmm", features = [
+    "no-entrypoint",
+    "cpi",
+] }
+bkswapv2 = { path = "../bkswap-v2", features = ["cpi"] }
