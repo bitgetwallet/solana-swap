@@ -98,12 +98,16 @@ pub mod bkswapv2 {
         instructions::set_is_paused(ctx, is_paused)
     }
 
-    pub fn withdraw_other_token(ctx: Context<WithdrawOtherToken>, amount: u64) -> Result<()> {
-        instructions::withdraw_other_token(ctx, amount)
+    pub fn withdraw_tokens(ctx: Context<WithdrawTokens>, amount: u64) -> Result<()> {
+        instructions::withdraw_tokens(ctx, amount)
     }
 
     pub fn withdraw_lamports(ctx: Context<WithdrawLamports>) 
     -> Result<()> {
         instructions::withdraw_lamports(ctx)
+    }
+  
+    pub fn withdraw_tokens_pda(ctx: Context<WithdrawTokensPDA>, amount: u64, pda_seeds: Vec<Vec<u8>>) -> Result<()> {
+      instructions::withdraw_tokens_pda(ctx, amount, pda_seeds)
     }
 }

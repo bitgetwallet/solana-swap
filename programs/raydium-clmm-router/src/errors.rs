@@ -8,10 +8,10 @@ pub enum ErrorCode {
     AmountOverBalance,
     #[msg("Amount is 0")]
     AmountIsZero,
-    #[msg("Invalid input param")]
-    InvalidInputParam,
-    #[msg("The input address cannot be zero")]
-    TheInputAddressCannotBeZero,
+    #[msg("Address cannot be null")]
+    AddressCannotBeNull,
+    #[msg("Value cannot be equal")]
+    ValueCannotBeEqual,
     #[msg("Transfer amount need GT 0")]
     TransferAmountNeedGT0,
     #[msg("Too little output received")]
@@ -20,5 +20,9 @@ pub enum ErrorCode {
     TooMuchInputPaid,
     #[msg("Arithmetic Error (overflow/underflow)")]
     ArithmeticError,
+    #[msg("Other_amount_threshold cannot be zero")]
+    ThresholdAmountCannotBeZero,
+    #[msg("Invalid PDA")]
+    InvalidPDA,
 
 }

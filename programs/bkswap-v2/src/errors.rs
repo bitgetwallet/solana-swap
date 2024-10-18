@@ -16,4 +16,6 @@ pub enum ErrorCode {
     AmountOverBalance,
     #[msg("Amount cannot be zero")]
     AmountCannotBeZero,
+    #[msg("Invalid PDA")]
+    InvalidPDA,
 }

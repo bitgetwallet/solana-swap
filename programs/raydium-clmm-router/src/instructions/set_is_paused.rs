@@ -13,7 +13,7 @@ pub struct SetIsPaused<'info> {
 
 pub fn set_is_paused(ctx: Context<SetIsPaused>, is_paused: bool) -> Result<()> {
     let account = &mut ctx.accounts.admin_info;
-    require!(is_paused != account.is_paused, ErrorCode::InvalidInputParam);
+    require!(is_paused != account.is_paused, ErrorCode::ValueCannotBeEqual);
     msg!("old paused is {:?}", account.is_paused);
     account.is_paused = is_paused;
     msg!("new paused is {:?}", account.is_paused);

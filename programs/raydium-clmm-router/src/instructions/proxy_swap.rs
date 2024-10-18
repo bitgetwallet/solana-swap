@@ -14,12 +14,16 @@ use raydium_amm_v3::{
 use bkswapv2::cpi::accounts::CollectFee; 
 use bkswapv2::{self};
 use crate::errors::ErrorCode;
+use crate::state::*;
 
 
 /// Memo msg for swap
 pub const SWAP_MEMO_MSG: &'static [u8] = b"raydium_swap";
 #[derive(Accounts)]
 pub struct ProxySwap<'info> {
+    #[account(mut, seeds=[b"admin_info"], bump)]
+    pub admin_info: Account<'info, AdminInfo>,
+
     pub clmm_program: Program<'info, AmmV3>,
     /// The user performing the swap
     pub payer: Signer<'info>,
@@ -83,7 +87,7 @@ pub struct ProxySwap<'info> {
 
     /// CHECK: Safe
     #[account(mut)]
-    pub admin_info: UncheckedAccount<'info>,
+    pub bkswap_admin_info: UncheckedAccount<'info>,
     /// CHECK: Safe
     #[account(mut)]
     pub fee_to_token_account: UncheckedAccount<'info>,
@@ -107,6 +111,9 @@ pub struct ProxySwap<'info> {
 
 #[derive(Accounts)]
 pub struct ProxySwap2<'info> {
+    #[account(mut, seeds=[b"admin_info"], bump)]
+    pub admin_info: Account<'info, AdminInfo>,
+
     pub clmm_program: Program<'info, AmmV3>,
     /// The user performing the swap
     pub payer: Signer<'info>,
@@ -180,6 +187,9 @@ pub struct ProxySwap2<'info> {
 
 #[derive(Accounts)]
 pub struct ProxySwap3<'info> {
+    #[account(mut, seeds=[b"admin_info"], bump)]
+    pub admin_info: Account<'info, AdminInfo>,
+
     pub clmm_program: Program<'info, AmmV3>,
     /// The user performing the swap
     pub payer: Signer<'info>,
@@ -308,9 +318,12 @@ pub fn proxy_swap<'a, 'b, 'c: 'info, 'info>(
     sqrt_price_limit_x64: u128,
     is_base_input: bool,
 ) -> Result<()> {
+    require!(!ctx.accounts.admin_info.is_paused, ErrorCode::ProtocolPaused);
+    // other_amount_threshold
+    require!(other_amount_threshold > 0, ErrorCode::ThresholdAmountCannotBeZero);
 
     let cpi_accounts = CollectFee{
-        admin_info: ctx.accounts.admin_info.to_account_info(),
+        admin_info: ctx.accounts.bkswap_admin_info.to_account_info(),
         user_source_token_account: ctx.accounts.input_token_account.to_account_info(),
         user_owner: ctx.accounts.payer.to_account_info(),
         fee_to_token_account: ctx.accounts.fee_to_token_account.to_account_info(),
@@ -374,7 +387,7 @@ pub fn proxy_swap<'a, 'b, 'c: 'info, 'info>(
 
         // collect_fee with amountOut == amount
         let cpi_accounts = CollectFee{
-            admin_info: ctx.accounts.admin_info.to_account_info(),
+            admin_info: ctx.accounts.bkswap_admin_info.to_account_info(),
             user_source_token_account: ctx.accounts.output_token_account.to_account_info(),
             user_owner: ctx.accounts.payer.to_account_info(),
             fee_to_token_account: ctx.accounts.fee_to_token_account.to_account_info(),
@@ -402,6 +415,10 @@ pub fn proxy_swap2<'a, 'b, 'c: 'info, 'info>(
     sqrt_price_limit_x64: u128,
     is_base_input: bool,
 ) -> Result<()> {
+    require!(!ctx.accounts.admin_info.is_paused, ErrorCode::ProtocolPaused);
+    // other_amount_threshold
+    require!(other_amount_threshold > 0, ErrorCode::ThresholdAmountCannotBeZero);
+
     let new_bal_x_token = ctx.accounts.input_token_account.amount;
     let old_balance_x_token = ctx.accounts.old_balance_pda_account.token_balance;
     msg!("new_bal_x_token: {:?}", new_bal_x_token);
@@ -455,6 +472,10 @@ pub fn proxy_swap3<'a, 'b, 'c: 'info, 'info>(
     sqrt_price_limit_x64: u128,
     is_base_input: bool,
 ) -> Result<()> {
+    require!(!ctx.accounts.admin_info.is_paused, ErrorCode::ProtocolPaused);
+    // other_amount_threshold
+    require!(other_amount_threshold > 0, ErrorCode::ThresholdAmountCannotBeZero);
+
     let new_bal_x_token = ctx.accounts.input_token_account.amount;
     let old_balance_x_token = ctx.accounts.old_balance_pda_account.token_balance;
     msg!("new_bal_x_token: {:?}", new_bal_x_token);
@@ -500,4 +521,3 @@ pub fn proxy_swap3<'a, 'b, 'c: 'info, 'info>(
 
     Ok(())
 }
-

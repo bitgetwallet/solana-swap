@@ -3,9 +3,9 @@ use crate::state::*;
 use crate::errors::ErrorCode;
 
 pub fn set_authority(ctx: Context<SetAdminRole>, authority: Pubkey) -> Result<()> {
-    require!(authority != Pubkey::default(), ErrorCode::TheInputAddressCannotBeZero);
+    require!(authority != Pubkey::default(), ErrorCode::AddressCannotBeNull);
     let account = &mut ctx.accounts.admin_info;
-    require!(authority.key() != account.authority.key(), ErrorCode::InvalidInputParam);
+    require!(authority.key() != account.authority.key(), ErrorCode::ValueCannotBeEqual);
 
     msg!("old authority is {:?}", account.authority);
     account.authority = authority;
@@ -14,9 +14,9 @@ pub fn set_authority(ctx: Context<SetAdminRole>, authority: Pubkey) -> Result<()
 }
 
 pub fn set_operator(ctx: Context<SetAdminRole>, operator: Pubkey) -> Result<()> {
-    require!(operator != Pubkey::default(), ErrorCode::TheInputAddressCannotBeZero);
+    require!(operator != Pubkey::default(), ErrorCode::AddressCannotBeNull);
     let account = &mut ctx.accounts.admin_info;
-    require!(operator.key() != account.operator.key(), ErrorCode::InvalidInputParam);
+    require!(operator.key() != account.operator.key(), ErrorCode::ValueCannotBeEqual);
 
     msg!("old operator is {:?}", account.operator);
     account.operator = operator;
@@ -25,9 +25,9 @@ pub fn set_operator(ctx: Context<SetAdminRole>, operator: Pubkey) -> Result<()> 
 }
 
 pub fn set_receiver(ctx: Context<SetAdminRole>, receiver: Pubkey) -> Result<()> {
-    require!(receiver != Pubkey::default(), ErrorCode::TheInputAddressCannotBeZero);
+    require!(receiver != Pubkey::default(), ErrorCode::AddressCannotBeNull);
     let account = &mut ctx.accounts.admin_info;
-    require!(receiver.key() != account.receiver.key(), ErrorCode::InvalidInputParam);
+    require!(receiver.key() != account.receiver.key(), ErrorCode::ValueCannotBeEqual);
 
     msg!("old receiver is {:?}", account.receiver);
     account.receiver = receiver;
@@ -35,4 +35,3 @@ pub fn set_receiver(ctx: Context<SetAdminRole>, receiver: Pubkey) -> Result<()> 
 
     Ok(())
 }
-
