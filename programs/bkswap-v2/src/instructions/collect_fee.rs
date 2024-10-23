@@ -1,5 +1,4 @@
 use anchor_lang::prelude::*;
-// use anchor_spl::token::{self, TokenAccount};
 use crate::consts::*;
 use crate::state::*;
 use crate::errors::ErrorCode;
@@ -33,37 +32,29 @@ pub struct CollectFee<'info> {
     pub token_program: AccountInfo<'info>,
 
     /// SPL program 2022 for token transfers
-    pub token_program_2022: Option<AccountInfo<'info>>,
-
-    #[account(seeds=[b"fee_receivers"],bump)]
-    pub fee_receivers: Account<'info, FeeReceivers>,
-
-    #[account(seeds=[b"fee_tokens"],bump)]
-    pub fee_tokens: Account<'info, FeeTokens>,
-
-    #[account(seeds=[b"whitelist"],bump)]
-    pub whitelist: Account<'info, Whitelist>,
+    pub token_program_2022: Option<AccountInfo<'info>>
 }
 
 pub fn collect_fee(
     ctx: Context<CollectFee>,
     amount: u64,
 ) -> Result<u64> {
-    require!(!ctx.accounts.admin_info.is_paused, ErrorCode::ProtocolPaused);
+    let admin_info = &mut ctx.accounts.admin_info;
+    require!(!admin_info.is_paused, ErrorCode::ProtocolPaused);
     require!(ctx.accounts.user_owner.key() != Pubkey::default(), ErrorCode::UserCannotBeZeroAddress);
     require!(amount > 0 , ErrorCode::AmountCannotBeZero);
 
-    if ctx.accounts.whitelist.users.contains(&ctx.accounts.user_owner.key()) {
+    if ctx.accounts.admin_info.users.contains(&ctx.accounts.user_owner.key()) {
         return Ok(amount);
     }
     
     if 
-        ctx.accounts.fee_tokens.special_tokens_01.contains(&ctx.accounts.mint.clone().expect("MintIsNone").key()) 
-        || ctx.accounts.fee_tokens.special_tokens_02.contains(&ctx.accounts.mint.clone().expect("MintIsNone").key()) 
+        ctx.accounts.admin_info.special_tokens_01.contains(&ctx.accounts.mint.clone().expect("MintIsNone").key()) 
+        || ctx.accounts.admin_info.special_tokens_02.contains(&ctx.accounts.mint.clone().expect("MintIsNone").key()) 
     {
-        require!(ctx.accounts.fee_to_token_account.owner.key() == ctx.accounts.fee_receivers.stable_token_receiver, ErrorCode::InputFeeReceiverIsInvalid);
+        require!(ctx.accounts.fee_to_token_account.owner.key() == ctx.accounts.admin_info.stable_token_receiver, ErrorCode::InputFeeReceiverIsInvalid);
     } else {
-        require!(ctx.accounts.fee_to_token_account.owner.key() == ctx.accounts.fee_receivers.other_token_receiver, ErrorCode::InputFeeReceiverIsInvalid);
+        require!(ctx.accounts.fee_to_token_account.owner.key() == ctx.accounts.admin_info.other_token_receiver, ErrorCode::InputFeeReceiverIsInvalid);
     }
 
     let fee_amount: u64 = ((amount as u128) * (ctx.accounts.admin_info.fee_rate as u128) / PROTOCOL_FEE_RATE_MUL_VALUE).try_into().unwrap();
@@ -107,5 +98,3 @@ pub fn collect_fee(
 
     Ok(amount - fee_amount)
 }
-
-

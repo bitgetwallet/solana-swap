@@ -22,7 +22,7 @@ pub const SWAP_MEMO_MSG: &'static [u8] = b"raydium_swap";
 #[derive(Accounts)]
 pub struct ProxySwap<'info> {
     #[account(mut, seeds=[b"admin_info"], bump)]
-    pub admin_info: Account<'info, AdminInfo>,
+    pub admin_info: Box<Account<'info, AdminInfo>>,
 
     pub clmm_program: Program<'info, AmmV3>,
     /// The user performing the swap
@@ -94,25 +94,14 @@ pub struct ProxySwap<'info> {
     /// CHECK: Safe
     pub bkswap_program: AccountInfo<'info>,
 
-    pub mint: Box<InterfaceAccount<'info, Mint>>,
-
-    /// CHECK: Safe
-    #[account(mut)]
-    pub fee_receivers: UncheckedAccount<'info>,
-    /// CHECK: Safe
-    #[account(mut)]
-    pub fee_tokens: UncheckedAccount<'info>,
-    /// CHECK: Safe
-    #[account(mut)]
-    pub whitelist: UncheckedAccount<'info>,
-
+    pub mint: Box<InterfaceAccount<'info, Mint>>
 
 }
 
 #[derive(Accounts)]
 pub struct ProxySwap2<'info> {
     #[account(mut, seeds=[b"admin_info"], bump)]
-    pub admin_info: Account<'info, AdminInfo>,
+    pub admin_info: Box<Account<'info, AdminInfo>>,
 
     pub clmm_program: Program<'info, AmmV3>,
     /// The user performing the swap
@@ -188,7 +177,7 @@ pub struct ProxySwap2<'info> {
 #[derive(Accounts)]
 pub struct ProxySwap3<'info> {
     #[account(mut, seeds=[b"admin_info"], bump)]
-    pub admin_info: Account<'info, AdminInfo>,
+    pub admin_info: Box<Account<'info, AdminInfo>>,
 
     pub clmm_program: Program<'info, AmmV3>,
     /// The user performing the swap
@@ -330,10 +319,7 @@ pub fn proxy_swap<'a, 'b, 'c: 'info, 'info>(
         
         mint: Some(ctx.accounts.mint.to_account_info()),
         token_program: ctx.accounts.token_program.to_account_info(),
-        token_program_2022: Some(ctx.accounts.token_program_2022.to_account_info()),
-        fee_receivers: ctx.accounts.fee_receivers.to_account_info(),
-        fee_tokens: ctx.accounts.fee_tokens.to_account_info(),
-        whitelist: ctx.accounts.whitelist.to_account_info()
+        token_program_2022: Some(ctx.accounts.token_program_2022.to_account_info())
     };
     let bkswap_program = ctx.accounts.bkswap_program.to_account_info();
     let cpi_ctx = CpiContext::new(bkswap_program, cpi_accounts);
@@ -394,10 +380,7 @@ pub fn proxy_swap<'a, 'b, 'c: 'info, 'info>(
             
             mint: Some(ctx.accounts.mint.to_account_info()),
             token_program: ctx.accounts.token_program.to_account_info(),
-            token_program_2022: Some(ctx.accounts.token_program_2022.to_account_info()),
-            fee_receivers: ctx.accounts.fee_receivers.to_account_info(),
-            fee_tokens: ctx.accounts.fee_tokens.to_account_info(),
-            whitelist: ctx.accounts.whitelist.to_account_info()
+            token_program_2022: Some(ctx.accounts.token_program_2022.to_account_info())
         };
         let bkswap_program = ctx.accounts.bkswap_program.to_account_info();
         let cpi_ctx_fee = CpiContext::new(bkswap_program, cpi_accounts);

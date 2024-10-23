@@ -12,30 +12,6 @@ pub struct Initialize<'info> {
     )]
     pub admin_info: Box<Account<'info, AdminInfo>>,
 
-    #[account(
-        init, payer = authority, 
-        space = 8 + FeeReceivers::LEN,
-        seeds=[b"fee_receivers"],
-        bump
-    )]
-    pub fee_receivers: Box<Account<'info, FeeReceivers>>,
-
-    #[account(
-        init, payer = authority, 
-        space = 8 + FeeTokens::LEN,
-        seeds=[b"fee_tokens"],
-        bump
-    )]
-    pub fee_tokens: Box<Account<'info, FeeTokens>>,
-
-    #[account(
-        init, payer = authority, 
-        space = 8 + Whitelist::LEN,
-        seeds=[b"whitelist"],
-        bump
-    )]
-    pub whitelist: Box<Account<'info, Whitelist>>,
-
     #[account(mut)]
     pub authority: Signer<'info>,
     #[account(constraint = program.programdata_address()? == Some(program_data.key()))]
@@ -62,25 +38,23 @@ pub fn initialize(
     admin_info.authority = authority;
     admin_info.operator = operator;
     admin_info.receiver = receiver;
-    admin_info.fee_receivers_pda = ctx.accounts.fee_receivers.key();
+
+    admin_info.stable_token_receiver = stable_token_receiver;
+    admin_info.other_token_receiver = other_token_receiver;
     admin_info.fee_rate = fee_rate;
-    admin_info.fee_tokens_pda = ctx.accounts.fee_tokens.key();
-    admin_info.whitelist_pda = ctx.accounts.whitelist.key();
 
-    let fee_receivers = &mut ctx.accounts.fee_receivers;
-    fee_receivers.stable_token_receiver = stable_token_receiver;
-    fee_receivers.other_token_receiver = other_token_receiver;
-
-    let whitelist = &mut ctx.accounts.whitelist;
-    whitelist.users = whitelist_users;
-    whitelist.total_num = user_num;
+    admin_info.users = whitelist_users;
+    admin_info.real_users_num = user_num;
 
     msg!("authority is {:?}", admin_info.authority);
     msg!("operator is {:?}", admin_info.operator);
     msg!("receiver is {:?}", admin_info.receiver);
-    msg!("fee_receiver is {:?}", admin_info.fee_receivers_pda);
+
+    msg!("stable_token_receiver is {:?}", admin_info.stable_token_receiver);
+    msg!("other_token_receiver is {:?}", admin_info.other_token_receiver);
+
     msg!("fee_rate is {:?}", admin_info.fee_rate);
-    // msg!("special_tokens is {:?}", fee_tokens.special_tokens);
-    msg!("whitelist.users is {:?}", whitelist.users);
+    msg!("whitelist.users is {:?}", admin_info.users);
+    msg!("real_users_num is {:?}", admin_info.real_users_num);
     Ok(())
 }
