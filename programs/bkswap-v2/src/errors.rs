@@ -18,4 +18,14 @@ pub enum ErrorCode {
     AmountCannotBeZero,
     #[msg("Invalid PDA")]
     InvalidPDA,
+    #[msg("Address cannot be null")]
+    AddressCannotBeNull,
+    #[msg("Value cannot be equal")]
+    ValueCannotBeEqual,
+    #[msg("User num too many")]
+    UserNumTooMany,
+    #[msg("Token num too many")]
+    TokenNumTooMany,
+    #[msg("Bal need GT rent balance")]
+    BalNeedGTRentBalance
 }

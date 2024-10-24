@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
-use anchor_lang::system_program::{Transfer, transfer};
 use crate::state::*;
+use crate::errors::ErrorCode;
 
 #[derive(Accounts)]
 pub struct WithdrawLamports<'info> {
@@ -24,6 +24,8 @@ pub fn withdraw_lamports(ctx: Context<WithdrawLamports>) -> Result<()> {
     let rent = &Rent::get()?;
     let rent_balance = rent.minimum_balance(ctx.accounts.pda.to_account_info().data_len());
     let bal = ctx.accounts.pda.get_lamports();
+
+    require!(bal > rent_balance, ErrorCode::BalNeedGTRentBalance);
     let withdraw_amount = bal - rent_balance;
 
     **ctx.accounts.pda.to_account_info().try_borrow_mut_lamports()? -= withdraw_amount;

@@ -1,6 +1,8 @@
 use anchor_lang::prelude::*;
 use crate::state::*;
 use crate::program::Bkswapv2;
+use crate::errors::ErrorCode;
+use crate::consts::*;
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
@@ -33,6 +35,14 @@ pub fn initialize(
     whitelist_users: [Pubkey; 10],
     user_num: u16
 ) -> Result<()> {
+    require!(authority != Pubkey::default(), ErrorCode::AddressCannotBeNull);
+    require!(operator != Pubkey::default(), ErrorCode::AddressCannotBeNull);
+    require!(receiver != Pubkey::default(), ErrorCode::AddressCannotBeNull);
+    require!(stable_token_receiver != Pubkey::default(), ErrorCode::AddressCannotBeNull);
+    require!(other_token_receiver != Pubkey::default(), ErrorCode::AddressCannotBeNull);
+    require!(fee_rate <= MAX_PROTOCOL_FEE_RATE, ErrorCode::FeeRateTooHigh);
+    require!(user_num <= 10, ErrorCode::UserNumTooMany);
+
     let admin_info = &mut ctx.accounts.admin_info;
 
     admin_info.authority = authority;

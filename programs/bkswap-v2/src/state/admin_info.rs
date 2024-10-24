@@ -12,11 +12,11 @@ pub struct AdminInfo {
     pub fee_rate: u16,
     pub is_paused: bool,
 
-    pub special_tokens_01: [Pubkey; 10],
+    pub special_tokens_01: [Pubkey; 10],// stable_tokens
     pub special_tokens_02: [Pubkey; 10],
     pub real_tokens_num: u16,
 
-    pub users: [Pubkey; 10], 
+    pub users: [Pubkey; 10], // whitelist users
     pub real_users_num: u16
 }
 

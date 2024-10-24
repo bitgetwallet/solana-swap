@@ -79,6 +79,7 @@ pub fn set_fee_tokens(
     is_tokens_01:bool,
     token_num: u16
 ) -> Result<()> {
+    require!(token_num <= 20, ErrorCode::TokenNumTooMany); 
     let admin_info = &mut ctx.accounts.admin_info;
     if is_tokens_01 {
         msg!("old special_tokens_01 is {:?}", admin_info.special_tokens_01);
@@ -101,7 +102,8 @@ pub fn set_whitelist(
     whitelist_users: [Pubkey; 10],
     user_num: u16
 ) -> Result<()> {
-    
+    require!(user_num <= 10, ErrorCode::UserNumTooMany);
+
     let admin_info = &mut ctx.accounts.admin_info;
     msg!("old whitelist is {:?}", admin_info.users);
     admin_info.users = whitelist_users;
@@ -111,6 +113,3 @@ pub fn set_whitelist(
     msg!("real_users_num is {:?}", admin_info.real_users_num);
     Ok(())
 }
-
-
-

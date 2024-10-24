@@ -24,5 +24,7 @@ pub enum ErrorCode {
     ThresholdAmountCannotBeZero,
     #[msg("Invalid PDA")]
     InvalidPDA,
+    #[msg("Bal need GT rent balance")]
+    BalNeedGTRentBalance
 
 }
