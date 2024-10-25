@@ -1,12 +1,13 @@
 use anchor_lang::prelude::*;
 use instructions::*;
+use crate::state::*;
 
 pub mod instructions;
 mod consts;
 mod state;
 mod errors;
 
-declare_id!("2o1ApYA73aQr6EZgdDFSAhd2c9XFPp6uKuy7B5skvbsn");
+declare_id!("49hgzDCHtNK58QydDjyeshTA6sfdiAxT1KfAfR8frkGi");
 
 #[program]
 pub mod bkswapv2 {
@@ -20,10 +21,7 @@ pub mod bkswapv2 {
         stable_token_receiver: Pubkey,
         other_token_receiver: Pubkey,
         fee_rate: u16,
-        //special_tokens_vec: Vec<Pubkey>,
-        // special_tokens: [Pubkey; 16],
         whitelist_users: [Pubkey; 10],
-        // token_num: u16,
         user_num: u16
     ) -> Result<()> {
         instructions::initialize(
@@ -41,7 +39,7 @@ pub mod bkswapv2 {
     }
 
     pub fn set_whitelist(
-        ctx: Context<SetWhitelist>,
+        ctx: Context<SetAdminInfo>,
         whitelist_users: [Pubkey; 10],
         user_num: u16
     ) -> Result<()> {
@@ -53,15 +51,15 @@ pub mod bkswapv2 {
     }
 
     pub fn set_fee_tokens(
-        ctx: Context<SetFeeTokens>,
-        special_tokens_01: [Pubkey; 10],
-        special_tokens_02: [Pubkey; 10],
+        ctx: Context<SetAdminInfo>,
+        special_tokens: [Pubkey; 10],
+        is_tokens_01:bool,
         token_num: u16
     ) -> Result<()> {
         instructions::set_fee_tokens(
             ctx,
-            special_tokens_01,
-            special_tokens_02,
+            special_tokens,
+            is_tokens_01,
             token_num
         )
     }
@@ -70,27 +68,27 @@ pub mod bkswapv2 {
         instructions::collect_fee(ctx, amount)
     }
 
-    pub fn set_authority(ctx: Context<SetAuthority>, authority: Pubkey) -> Result<()> {
+    pub fn set_authority(ctx: Context<SetAdminInfo>, authority: Pubkey) -> Result<()> {
         instructions::set_authority(ctx, authority)
     }
 
-    pub fn set_operator(ctx: Context<SetOperator>, new_operator: Pubkey) -> Result<()> {
+    pub fn set_operator(ctx: Context<SetAdminInfo>, new_operator: Pubkey) -> Result<()> {
         instructions::set_operator(ctx, new_operator)
     }
 
-    pub fn set_receiver(ctx: Context<SetReceiver>, new_receiver: Pubkey) -> Result<()> {
+    pub fn set_receiver(ctx: Context<SetAdminInfo>, new_receiver: Pubkey) -> Result<()> {
         instructions::set_receiver(ctx, new_receiver)
     }
 
-    pub fn set_stable_token_receiver(ctx: Context<SetFeeReceiver>, new_fee_receiver: Pubkey) -> Result<()> {
+    pub fn set_stable_token_receiver(ctx: Context<SetAdminInfo>, new_fee_receiver: Pubkey) -> Result<()> {
         instructions::set_stable_token_receiver(ctx, new_fee_receiver)
     }
 
-    pub fn set_other_token_receiver(ctx: Context<SetFeeReceiver>, new_fee_receiver: Pubkey) -> Result<()> {
+    pub fn set_other_token_receiver(ctx: Context<SetAdminInfo>, new_fee_receiver: Pubkey) -> Result<()> {
         instructions::set_other_token_receiver(ctx, new_fee_receiver)
     }
 
-    pub fn set_fee_rate(ctx: Context<SetFeeRate>, fee_rate: u16) -> Result<()> {
+    pub fn set_fee_rate(ctx: Context<SetAdminInfo>, fee_rate: u16) -> Result<()> {
         instructions::set_fee_rate(ctx, fee_rate)
     }
 

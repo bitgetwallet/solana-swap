@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use crate::state::*;
 use crate::program::RaydiumClmmRouter;
-use anchor_lang::system_program;
+use crate::errors::ErrorCode;
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
@@ -28,6 +28,10 @@ pub fn initialize(
     operator: Pubkey,
     receiver: Pubkey
 ) -> Result<()> {
+    require!(authority != Pubkey::default(), ErrorCode::AddressCannotBeNull);
+    require!(operator != Pubkey::default(), ErrorCode::AddressCannotBeNull);
+    require!(receiver != Pubkey::default(), ErrorCode::AddressCannotBeNull);
+
     let account = &mut ctx.accounts.admin_info;
     account.authority = authority;
     account.operator = operator;
