@@ -18,4 +18,4 @@ raydium_extra_router: DGumNmyMhSeuNYsJLWD7VELLoENEenp99pTtDqSR9dUy
 
 ## Audit
 
-This protocol is completely audited by ExVul.
+This protocol is completely audited by [ExVul](https://exvul.com).
