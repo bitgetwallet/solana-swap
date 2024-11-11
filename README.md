@@ -16,6 +16,10 @@ raydium_router: 4Ji3eRdwjCg2wuuJVbRBvqkPKz2xs4tchxQ4tZNhbUfs
 
 raydium_extra_router: DGumNmyMhSeuNYsJLWD7VELLoENEenp99pTtDqSR9dUy
 
+bkswapv2: Fv3fcy7DJRNdQu5618oJ8FGe7LdQ7oWGUj5oVVxFweTv
+
+raydium-clmm-router: 2WKs6hQg3cesC2D7Hxtt878beWFezbd5dJZmFmrXumnH
+
 ## Audit
 
 This protocol is completely audited by [ExVul](https://exvul.com).

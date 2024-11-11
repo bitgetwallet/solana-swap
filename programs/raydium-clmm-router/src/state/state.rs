@@ -6,6 +6,8 @@ pub struct AdminInfo {
     pub operator: Pubkey,
     pub receiver: Pubkey,
     pub is_paused: bool,
+    pub bkswap_program_id: Pubkey,
+    pub clmm_program_id: Pubkey,
 }
 
 impl AdminInfo {

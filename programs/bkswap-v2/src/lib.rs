@@ -7,7 +7,7 @@ mod consts;
 mod state;
 mod errors;
 
-declare_id!("49hgzDCHtNK58QydDjyeshTA6sfdiAxT1KfAfR8frkGi");
+declare_id!("Fv3fcy7DJRNdQu5618oJ8FGe7LdQ7oWGUj5oVVxFweTv");
 
 #[program]
 pub mod bkswapv2 {

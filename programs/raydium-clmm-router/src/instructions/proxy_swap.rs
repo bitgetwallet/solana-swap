@@ -11,7 +11,7 @@ use raydium_amm_v3::{
     states::{AmmConfig, ObservationState, PoolState},
 };
 
-use bkswapv2::cpi::accounts::CollectFee; 
+use bkswapv2::cpi::accounts::CollectFee;
 use bkswapv2::{self};
 use crate::errors::ErrorCode;
 use crate::state::*;
@@ -24,6 +24,9 @@ pub struct ProxySwap<'info> {
     #[account(mut, seeds=[b"admin_info"], bump)]
     pub admin_info: Box<Account<'info, AdminInfo>>,
 
+    #[account(
+        address = admin_info.clmm_program_id
+    )]
     pub clmm_program: Program<'info, AmmV3>,
     /// The user performing the swap
     pub payer: Signer<'info>,
@@ -92,6 +95,9 @@ pub struct ProxySwap<'info> {
     #[account(mut)]
     pub fee_to_token_account: UncheckedAccount<'info>,
     /// CHECK: Safe
+    #[account(
+        address = admin_info.bkswap_program_id
+    )]
     pub bkswap_program: AccountInfo<'info>,
 
     pub mint: Box<InterfaceAccount<'info, Mint>>
@@ -103,6 +109,9 @@ pub struct ProxySwap2<'info> {
     #[account(mut, seeds=[b"admin_info"], bump)]
     pub admin_info: Box<Account<'info, AdminInfo>>,
 
+    #[account(
+        address = admin_info.clmm_program_id
+    )]
     pub clmm_program: Program<'info, AmmV3>,
     /// The user performing the swap
     pub payer: Signer<'info>,
@@ -168,7 +177,7 @@ pub struct ProxySwap2<'info> {
     #[account(
         mut, 
         seeds = [b"store_old_balance".as_ref(), payer.key().as_ref()],bump, 
-        constraint = old_balance_pda_account.x_mint == input_token_account.mint,
+        constraint = old_balance_pda_account.x_token_account == input_token_account.key(),
         close = payer
     )]
     old_balance_pda_account: Box<Account<'info, TokenBalance>>,
@@ -179,6 +188,9 @@ pub struct ProxySwap3<'info> {
     #[account(mut, seeds=[b"admin_info"], bump)]
     pub admin_info: Box<Account<'info, AdminInfo>>,
 
+    #[account(
+        address = admin_info.clmm_program_id
+    )]
     pub clmm_program: Program<'info, AmmV3>,
     /// The user performing the swap
     pub payer: Signer<'info>,
@@ -244,14 +256,14 @@ pub struct ProxySwap3<'info> {
     #[account(
         mut, 
         seeds = [b"store_old_balance".as_ref(), creator_old_bal_pda.key().as_ref()],bump, 
-        constraint = old_balance_pda_account.x_mint == input_token_account.mint,
+        constraint = old_balance_pda_account.x_token_account == input_token_account.key(),
         close = creator_old_bal_pda
     )]
     old_balance_pda_account: Box<Account<'info, TokenBalance>>,
 
     /// The user pay for create old_balance_pda
     #[account(mut)]
-    pub creator_old_bal_pda: Signer<'info>,// 代付者
+    pub creator_old_bal_pda: Signer<'info>,
 
 
 }
@@ -277,7 +289,7 @@ pub struct StoreOldTokenBalance<'info> {
 
 #[account] 
  pub struct TokenBalance {
-    pub x_mint: Pubkey,
+    pub x_token_account: Pubkey,
     pub token_balance: u64
  }
 
@@ -292,9 +304,10 @@ pub struct StoreOldTokenBalance<'info> {
     if account.token_balance != cur_balance {
         account.token_balance = cur_balance;
     }
-    if account.x_mint != ctx.accounts.x_mint.key() {
-        account.x_mint = ctx.accounts.x_mint.key();
+    if account.x_token_account != ctx.accounts.x_token_account.key() {
+        account.x_token_account = ctx.accounts.x_token_account.key();
     }
+    msg!("x_token_account: {:?}", ctx.accounts.x_token_account.key());
     msg!("cur_token_balance: {:?}", cur_balance);
     Ok(())
   }
@@ -396,11 +409,13 @@ pub fn proxy_swap2<'a, 'b, 'c: 'info, 'info>(
     // amount: u64,
     other_amount_threshold: u64,
     sqrt_price_limit_x64: u128,
-    is_base_input: bool,
+    is_base_input: bool
 ) -> Result<()> {
     require!(!ctx.accounts.admin_info.is_paused, ErrorCode::ProtocolPaused);
     // other_amount_threshold
     require!(other_amount_threshold > 0, ErrorCode::ThresholdAmountCannotBeZero);
+
+    require!(ctx.accounts.old_balance_pda_account.x_token_account.key() == ctx.accounts.input_token_account.key(), ErrorCode::TokenAccountNotEqual);
 
     let new_bal_x_token = ctx.accounts.input_token_account.amount;
     let old_balance_x_token = ctx.accounts.old_balance_pda_account.token_balance;
@@ -453,7 +468,7 @@ pub fn proxy_swap3<'a, 'b, 'c: 'info, 'info>(
     // amount: u64,
     other_amount_threshold: u64,
     sqrt_price_limit_x64: u128,
-    is_base_input: bool,
+    is_base_input: bool
 ) -> Result<()> {
     require!(!ctx.accounts.admin_info.is_paused, ErrorCode::ProtocolPaused);
     // other_amount_threshold

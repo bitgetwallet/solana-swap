@@ -35,3 +35,27 @@ pub fn set_receiver(ctx: Context<SetAdminRole>, receiver: Pubkey) -> Result<()> 
 
     Ok(())
 }
+
+pub fn set_bkswap_program_id(ctx: Context<SetAdminRole>, bkswap_program_id: Pubkey) -> Result<()> {
+    require!(bkswap_program_id != Pubkey::default(), ErrorCode::AddressCannotBeNull);
+    let account = &mut ctx.accounts.admin_info;
+    require!(bkswap_program_id.key() != account.bkswap_program_id.key(),ErrorCode::ValueCannotBeEqual);
+
+    msg!("old bkswap_program_id is {:?}", account.bkswap_program_id);
+    account.bkswap_program_id = bkswap_program_id;
+    msg!("new bkswap_program_id is {:?}", account.bkswap_program_id);
+
+    Ok(())
+}
+
+pub fn set_clmm_program_id(ctx: Context<SetAdminRole>, clmm_program_id: Pubkey) -> Result<()> {
+    require!(clmm_program_id != Pubkey::default(), ErrorCode::AddressCannotBeNull);
+    let account = &mut ctx.accounts.admin_info;
+    require!(clmm_program_id.key() != account.clmm_program_id.key(),ErrorCode::ValueCannotBeEqual);
+
+    msg!("old clmm_program_id is {:?}", account.clmm_program_id);
+    account.clmm_program_id = clmm_program_id;
+    msg!("new clmm_program_id is {:?}", account.clmm_program_id);
+
+    Ok(())
+}

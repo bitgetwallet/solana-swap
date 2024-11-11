@@ -26,20 +26,29 @@ pub fn initialize(
     ctx: Context<Initialize>, 
     authority: Pubkey, 
     operator: Pubkey,
-    receiver: Pubkey
+    receiver: Pubkey,
+    bkswap_program_id: Pubkey,
+    clmm_program_id: Pubkey
 ) -> Result<()> {
     require!(authority != Pubkey::default(), ErrorCode::AddressCannotBeNull);
     require!(operator != Pubkey::default(), ErrorCode::AddressCannotBeNull);
     require!(receiver != Pubkey::default(), ErrorCode::AddressCannotBeNull);
+    require!(bkswap_program_id != Pubkey::default(), ErrorCode::AddressCannotBeNull);
+    require!(clmm_program_id != Pubkey::default(), ErrorCode::AddressCannotBeNull);
 
     let account = &mut ctx.accounts.admin_info;
     account.authority = authority;
     account.operator = operator;
     account.receiver = receiver;
+    account.bkswap_program_id = bkswap_program_id;
+    account.clmm_program_id = clmm_program_id;
 
     msg!("authority is {:?}", account.authority);
     msg!("operator is {:?}", account.operator);
     msg!("receiver is {:?}", account.receiver);
+
+    msg!("bkswap_program_id is {:?}", account.bkswap_program_id);
+    msg!("clmm_program_id is {:?}", account.clmm_program_id);
     
     Ok(())
 }

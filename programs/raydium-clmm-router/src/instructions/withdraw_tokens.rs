@@ -41,7 +41,7 @@ pub struct WithdrawTokens<'info> {
 #[derive(Accounts, Clone)]
 pub struct WithdrawTokensPDA<'info> {
     #[account(mut, seeds=[b"admin_info"], bump)]
-    pub admin_info: Account<'info, AdminInfo>,
+    pub admin_info: Box<Account<'info, AdminInfo>>,
 
     #[account(address = admin_info.operator)]
     pub operator: Signer<'info>,
@@ -49,13 +49,13 @@ pub struct WithdrawTokensPDA<'info> {
     pub mint: Option<Box<InterfaceAccount<'info, Mint>>>,
 
     #[account(mut, token::mint=mint)]
-    pub from_token_account: InterfaceAccount<'info, TokenAccount>,
+    pub from_token_account: Box<InterfaceAccount<'info, TokenAccount>>,
     #[account(
         mut,
         token::mint=mint,
         token::authority=admin_info.receiver
     )]
-    pub to_token_account: InterfaceAccount<'info, TokenAccount>,
+    pub to_token_account: Box<InterfaceAccount<'info, TokenAccount>>,
     
     /// CHECK from_ata_owner
     #[account(address = from_token_account.owner)]
@@ -63,10 +63,8 @@ pub struct WithdrawTokensPDA<'info> {
 
     pub token_program: Program<'info, Token>,
 
-    pub token_program_2022: Option<AccountInfo<'info>>,
+    pub token_program_2022: Option<AccountInfo<'info>>
 
-    /// CHECK: Optional, used for PDA withdrawals
-    pub pda: Option<UncheckedAccount<'info>>,
 }
 
 pub fn withdraw_tokens(ctx: Context<WithdrawTokens>, amount: u64) -> Result<()> {
@@ -124,6 +122,7 @@ pub fn withdraw_tokens_pda(
 
     let pda_seeds_refs: Vec<&[u8]> = pda_seeds.iter().map(|s| s.as_slice()).collect();
     let (derived_pda, bump) = Pubkey::find_program_address(&pda_seeds_refs, ctx.program_id);
+    require!(derived_pda == *ctx.accounts.from_ata_owner.key, ErrorCode::InvalidPDA);
 
     let mut signing_seeds = pda_seeds;
     signing_seeds.push(vec![bump]);
@@ -135,7 +134,7 @@ pub fn withdraw_tokens_pda(
     let token_program_2022 = &ctx.accounts.token_program_2022;
     let from_ata_info = ctx.accounts.from_token_account.to_account_info();
     let to_ata_info = ctx.accounts.to_token_account.to_account_info();
-    let pda = ctx.accounts.pda.as_ref().ok_or(ErrorCode::InvalidPDA)?;
+    let pda = ctx.accounts.from_ata_owner.to_account_info();
 
     match (mint, token_program_2022) {
         (Some(mint), Some(token_program_2022)) => {

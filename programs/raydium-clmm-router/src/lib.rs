@@ -8,7 +8,7 @@ use instructions::*;
 use crate::state::*;
 
 
-declare_id!("2QSbPkU9N8wVesAua1sh1Aip7fM9EBUrBdNFuQDjcxYo");
+declare_id!("2WKs6hQg3cesC2D7Hxtt878beWFezbd5dJZmFmrXumnH");
 
 #[program]
 pub mod raydium_clmm_router {
@@ -18,13 +18,17 @@ pub mod raydium_clmm_router {
         ctx: Context<Initialize>, 
         authority: Pubkey, 
         operator: Pubkey,
-        receiver: Pubkey
+        receiver: Pubkey,
+        bkswap_program_id: Pubkey,
+        clmm_program_id: Pubkey
     ) -> Result<()> {
         instructions::initialize(
             ctx,
             authority,
             operator,
             receiver,
+            bkswap_program_id,
+            clmm_program_id
         )
     }
 
@@ -37,7 +41,7 @@ pub mod raydium_clmm_router {
         amount: u64,
         other_amount_threshold: u64,
         sqrt_price_limit_x64: u128,
-        is_base_input: bool,
+        is_base_input: bool
     ) -> Result<()> {
         instructions::proxy_swap(
             ctx,
@@ -49,7 +53,7 @@ pub mod raydium_clmm_router {
     }
 
     pub fn store_old_balance(
-        ctx: Context<StoreOldTokenBalance>,
+        ctx: Context<StoreOldTokenBalance>
     ) -> Result<()> {
         instructions::store_old_balance(ctx)
     }
@@ -59,14 +63,14 @@ pub mod raydium_clmm_router {
         // amount: u64,
         other_amount_threshold: u64,
         sqrt_price_limit_x64: u128,
-        is_base_input: bool,
+        is_base_input: bool
     ) -> Result<()> {
         instructions::proxy_swap2(
             ctx,
             // amount,
             other_amount_threshold,
             sqrt_price_limit_x64,
-            is_base_input,
+            is_base_input
         )
     }
 
@@ -75,14 +79,14 @@ pub mod raydium_clmm_router {
         // amount: u64,
         other_amount_threshold: u64,
         sqrt_price_limit_x64: u128,
-        is_base_input: bool,
+        is_base_input: bool
     ) -> Result<()> {
         instructions::proxy_swap3(
             ctx,
             // amount,
             other_amount_threshold,
             sqrt_price_limit_x64,
-            is_base_input,
+            is_base_input
         )
     }
 
@@ -96,6 +100,14 @@ pub mod raydium_clmm_router {
 
     pub fn set_receiver(ctx: Context<SetAdminRole>, receiver: Pubkey) -> Result<()> {
         instructions::set_receiver(ctx, receiver)
+    }
+
+    pub fn set_bkswap_program_id(ctx: Context<SetAdminRole>, bkswap_program_id: Pubkey) -> Result<()> {
+        instructions::set_bkswap_program_id(ctx, bkswap_program_id)
+    }
+
+    pub fn set_clmm_program_id(ctx: Context<SetAdminRole>, clmm_program_id: Pubkey) -> Result<()> {
+        instructions::set_clmm_program_id(ctx, clmm_program_id)
     }
 
     pub fn withdraw_tokens(ctx: Context<WithdrawTokens>, amount: u64) -> Result<()> {

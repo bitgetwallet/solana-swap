@@ -25,6 +25,8 @@ pub enum ErrorCode {
     #[msg("Invalid PDA")]
     InvalidPDA,
     #[msg("Bal need GT rent balance")]
-    BalNeedGTRentBalance
+    BalNeedGTRentBalance,
+    #[msg("Token account not equal")]
+    TokenAccountNotEqual
 
 }
