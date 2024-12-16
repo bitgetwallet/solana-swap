@@ -1,0 +1,23 @@
+[package]
+name = "bkswapv3"
+version = "0.1.0"
+description = "Created with Anchor"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "bkswapv3"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = {version = "0.29.0", features = ["init-if-needed"]}
+anchor-spl = "0.29.0"
+spl-token = "=4.0.0"
+# spl-token-2022 = "=3.0.4"
+solana-program = ">=1.16, <1.18"

@@ -8,6 +8,10 @@ skip-lint = false
 bkswap = "3Hy9MBHowHUmhmSP1KahEvvtC8e6DxzLGeFjuiBQwRUA"
 raydium-clmm-router = "2WKs6hQg3cesC2D7Hxtt878beWFezbd5dJZmFmrXumnH"
 bkswapv2 = "Fv3fcy7DJRNdQu5618oJ8FGe7LdQ7oWGUj5oVVxFweTv"
+bkswapv3 = "6ZcaZFXwhGfYqsePSMFcQMtAq7Shk83CkB1CgXcyVf1K"
+raydium-amm-router-v3 = "6nceGXdv8oUPgdwvJGSPzG2CgBPKNCzEtZygzuCy6P3T"
+raydium-clmm-router-v3 = "CpDY6k6eoDm4oLDWut2bAfMt8KLGUN92A4yRHVMo8aR3"
+
 
 [registry]
 url = "https://api.apr.dev"
