@@ -129,7 +129,7 @@ pub fn set_whitelist(
 
 pub fn set_prededuct_receivers(
     ctx: Context<SetAdminInfo>,
-    prededuct_receivers: [Pubkey; 5]
+    prededuct_receivers: [Pubkey; 5]//todo 晚会确认prededuct_receivers的长度
 ) -> Result<()> {
 
     let admin_info = &mut ctx.accounts.admin_info;

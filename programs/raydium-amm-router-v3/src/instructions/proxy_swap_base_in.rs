@@ -1,16 +1,13 @@
 
 use anchor_lang::prelude::*;
-use solana_program::pubkey;
-
 use amm_anchor::SwapBaseIn;
 
 use bkswapv3::cpi::accounts::CollectFee;
 use bkswapv3::{self};
 
 use anchor_spl::{
-    token_interface::{Mint, TokenAccount, Token2022},
-    token::Token,
-    associated_token::AssociatedToken,
+    token_interface::{Mint, TokenAccount},
+    token::Token
   };
 
 use crate::state::*;
@@ -293,6 +290,9 @@ pub struct ProxyRouteSwapOut<'info> {
     pub amm_program: UncheckedAccount<'info>,
     /// CHECK: Safe. amm Account
     #[account(mut)]
+    pub amm_from: UncheckedAccount<'info>,
+    /// CHECK: Safe. amm Account
+    #[account(mut)]
     pub amm: UncheckedAccount<'info>,
     /// CHECK: Safe. Amm authority Account
     #[account()]
@@ -350,6 +350,8 @@ pub struct ProxyRouteSwapOut<'info> {
 
     #[account(
         mut,
+        seeds = [amm_from.key.as_ref(), user_token_source_box.mint.as_ref(), user_source_owner.key.as_ref()],
+        bump,
         constraint = (amount_out_pda.user == *user_source_owner.key) && (amount_out_pda.mint == user_token_source_box.mint),
         close = user_source_owner
     )]
@@ -419,7 +421,7 @@ pub fn proxy_swap_base_in(
     let bkswap_program = ctx.accounts.bkswap_program.to_account_info();
     let cpi_ctx = CpiContext::new(bkswap_program, cpi_accounts);
 
-    let amount_for = bkswapv3::cpi::collect_fee(
+    let amount_in_after = bkswapv3::cpi::collect_fee(
                 cpi_ctx, 
                 amount_in,
                 prededuct_amount,
@@ -428,13 +430,14 @@ pub fn proxy_swap_base_in(
     
     
     let before_bal_out = ctx.accounts.user_token_destination_box.amount;
-    let _ = amm_anchor::swap_base_in(ctx.accounts.into(), amount_for, minimum_amount_out);
+    let _ = amm_anchor::swap_base_in(ctx.accounts.into(), amount_in_after, minimum_amount_out);
     ctx.accounts.user_token_destination_box.reload()?;
     let after_bal_out = ctx.accounts.user_token_destination_box.amount;
+    let amount_out = after_bal_out.checked_sub(before_bal_out).ok_or(ErrorCode::ArithmeticError)?;
 
-    require!(after_bal_out.checked_sub(before_bal_out).ok_or(ErrorCode::ArithmeticError)? >= minimum_amount_out, ErrorCode::TooLittleOutputReceived);
+    require!(amount_out >= minimum_amount_out, ErrorCode::TooLittleOutputReceived);
 
-    Ok(after_bal_out - before_bal_out)
+    Ok(amount_out)
 
 }
 
@@ -463,7 +466,7 @@ pub fn proxy_route_swap_base_in(
     let bkswap_program = ctx.accounts.bkswap_program.to_account_info();
     let cpi_ctx = CpiContext::new(bkswap_program, cpi_accounts);
 
-    let amount_for = bkswapv3::cpi::collect_fee(
+    let amount_in_after = bkswapv3::cpi::collect_fee(
                 cpi_ctx, 
                 amount_in,
                 prededuct_amount,
@@ -472,16 +475,17 @@ pub fn proxy_route_swap_base_in(
     
     
     let before_bal_out = ctx.accounts.user_token_destination_box.amount;
-    let _ = amm_anchor::swap_base_in(ctx.accounts.into(), amount_for, minimum_amount_out);
+    let _ = amm_anchor::swap_base_in(ctx.accounts.into(), amount_in_after, minimum_amount_out);
     ctx.accounts.user_token_destination_box.reload()?;
     let after_bal_out = ctx.accounts.user_token_destination_box.amount;
+    let amount_out = after_bal_out.checked_sub(before_bal_out).ok_or(ErrorCode::ArithmeticError)?;
 
-    require!(after_bal_out.checked_sub(before_bal_out).ok_or(ErrorCode::ArithmeticError)? >= minimum_amount_out, ErrorCode::TooLittleOutputReceived);
+    require!(amount_out >= minimum_amount_out, ErrorCode::TooLittleOutputReceived);
 
     let amount_out_pda = &mut ctx.accounts.amount_out_pda;
     amount_out_pda.user = ctx.accounts.user_source_owner.key();
     amount_out_pda.mint = ctx.accounts.user_token_destination_box.mint;
-    amount_out_pda.amount_out = after_bal_out - before_bal_out;
+    amount_out_pda.amount_out = amount_out;
 
     Ok(after_bal_out - before_bal_out)
 
@@ -498,11 +502,10 @@ pub fn proxy_route_swap_out(
     let _ = amm_anchor::swap_base_in(ctx.accounts.into(), amount_in02, minimum_amount_out);
     ctx.accounts.user_token_destination_box.reload()?;
     let after_bal_out = ctx.accounts.user_token_destination_box.amount;
+    let amount_out = after_bal_out.checked_sub(before_bal_out).ok_or(ErrorCode::ArithmeticError)?;
 
-    require!(after_bal_out.checked_sub(before_bal_out).ok_or(ErrorCode::ArithmeticError)? >= minimum_amount_out, ErrorCode::TooLittleOutputReceived);
+    require!(amount_out >= minimum_amount_out, ErrorCode::TooLittleOutputReceived);
 
-    Ok(after_bal_out - before_bal_out)
+    Ok(amount_out)
 
 }
-
-

@@ -295,7 +295,7 @@ pub fn proxy_swap<'c: 'info, 'info>(
     let bkswap_program = ctx.bkswap_program.to_account_info();
     let cpi_ctx = CpiContext::new(bkswap_program, cpi_accounts);
 
-    let amount_for = bkswapv3::cpi::collect_fee(
+    let amount_in_after = bkswapv3::cpi::collect_fee(
                 cpi_ctx, 
                 amount,
                 prededuct_amount,
@@ -325,7 +325,7 @@ pub fn proxy_swap<'c: 'info, 'info>(
 
     let _ = cpi::swap_v2(
         cpi_context_swap,
-        amount_for, 
+        amount_in_after, 
         other_amount_threshold,
         sqrt_price_limit_x64,
         true //is_base_input,
@@ -333,20 +333,21 @@ pub fn proxy_swap<'c: 'info, 'info>(
 
     ctx.output_token_account.reload()?;
     let after_bal_out = ctx.output_token_account.amount;
+    let amount_out = after_bal_out.checked_sub(before_bal_out).ok_or(ErrorCode::ArithmeticError)?;
 
-    require!(after_bal_out.checked_sub(before_bal_out).ok_or(ErrorCode::ArithmeticError)? >= other_amount_threshold, ErrorCode::TooLittleOutputReceived);
+    require!(amount_out >= other_amount_threshold, ErrorCode::TooLittleOutputReceived);
 
-    Ok(after_bal_out - before_bal_out)
+    Ok(amount_out)
     
 }
 
 pub fn proxy_multi_swap<'a, 'b, 'c: 'info, 'info>(
     ctx: Context<'a, 'b, 'c, 'info, ProxyMultiSwap<'info>>,
     amount: u64,
+
     other_amount_threshold02: u64,
     sqrt_price_limit_x64: u128,
     sqrt_price_limit_x64_02: u128,
-    // is_base_input: bool
     prededuct_amount: u64,
     fee_rate: u16,
     swap_remaining_accounts_num: u8
@@ -430,9 +431,10 @@ pub fn proxy_multi_swap<'a, 'b, 'c: 'info, 'info>(
 
     ctx.accounts.output_token_account02.reload()?;
     let after_bal = ctx.accounts.output_token_account02.amount;
-    
-    require!(after_bal.checked_sub(before_bal).ok_or(ErrorCode::ArithmeticError)? >= other_amount_threshold02, ErrorCode::TooLittleOutputReceived);
+
+    let amount_out = after_bal.checked_sub(before_bal).ok_or(ErrorCode::ArithmeticError)?;
+
+    require!(amount_out >= other_amount_threshold02, ErrorCode::TooLittleOutputReceived);
 
     Ok(())
 }
-

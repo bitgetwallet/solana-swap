@@ -75,12 +75,15 @@ pub fn collect_fee(
     let user_ata_owner = *user_ata_info.owner;
 
     // Collect all transfer amounts and destinations
-    let mut transfer_amounts = vec![prededuct_amount];
-    let mut transfer_destinations = vec![ctx.accounts.prededuct_to_token_account.to_account_info()];
+    let mut transfer_amounts: Vec<u64> = vec![];
+    let mut transfer_destinations: Vec<AccountInfo<'_>> = vec![];
+    if prededuct_amount > 0 {
+        transfer_amounts.push(prededuct_amount);
+        transfer_destinations.push(ctx.accounts.prededuct_to_token_account.to_account_info());
+    }
 
     let mut fee_amount: u64 = ((amount as u128) * (fee_rate as u128) / PROTOCOL_FEE_RATE_MUL_VALUE).try_into().unwrap();
     if !ctx.accounts.admin_info.users.contains(&ctx.accounts.user_owner.key()) {
-        
         transfer_amounts.push(fee_amount);
         transfer_destinations.push(ctx.accounts.fee_to_token_account.to_account_info());
         
