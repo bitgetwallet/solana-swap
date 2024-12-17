@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use solana_program::pubkey;
+
 use crate::consts::*;
 use crate::state::*;
 use crate::errors::ErrorCode;
@@ -7,10 +7,8 @@ use crate::errors::ErrorCode;
 use anchor_spl::{
     token_interface::{Mint, TokenAccount, TokenInterface},
     token::{self},
-    token_2022::{self}
+    token_2022::{self, ID as TOKEN_PROGRAM_2022}
 };
-
-pub const TOKEN_PROGRAM_2022: Pubkey = pubkey!("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb");
 
 #[derive(Accounts, Clone)]
 pub struct CollectFee<'info> {
