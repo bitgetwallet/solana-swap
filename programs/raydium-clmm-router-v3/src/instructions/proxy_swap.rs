@@ -1,5 +1,4 @@
 use anchor_lang::prelude::*;
-use solana_program::pubkey;
 use anchor_spl::{
     token_interface::{Mint, TokenAccount, Token2022},
     token::Token,
@@ -21,7 +20,6 @@ use crate::state::*;
 
 /// Memo msg for swap
 pub const SWAP_MEMO_MSG: &'static [u8] = b"raydium_swap";
-// pub const TOKEN_PROGRAM_2022: Pubkey = pubkey!("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb");
 #[derive(Accounts)]
 pub struct ProxySwap<'info> {
     #[account(mut, seeds=[b"admin_info"], bump)]
@@ -44,7 +42,10 @@ pub struct ProxySwap<'info> {
     pub pool_state: AccountLoader<'info, PoolState>,
 
     /// The user token account for input token
-    #[account(mut)]
+    #[account(
+        mut,
+        constraint = input_token_account.mint.key() == input_vault_mint.key()
+    )]
     pub input_token_account: Box<InterfaceAccount<'info, TokenAccount>>,
 
     /// The user token account for output token
@@ -53,7 +54,7 @@ pub struct ProxySwap<'info> {
         payer = payer,
         associated_token::mint = output_vault_mint,
         associated_token::authority = payer,
-        associated_token::token_program = token_program_x
+        associated_token::token_program = token_program_y
     )]
     pub output_token_account: Box<InterfaceAccount<'info, TokenAccount>>,
 
@@ -77,9 +78,9 @@ pub struct ProxySwap<'info> {
 
     /// CHECK: Safe
     #[account(
-        constraint = (token_program_x.key() == spl_token::ID) || (token_program_x.key() == TOKEN_PROGRAM_2022.key())
+        constraint = (token_program_y.key() == spl_token::ID) || (token_program_y.key() == TOKEN_PROGRAM_2022.key())
     )]
-    pub token_program_x: AccountInfo<'info>,
+    pub token_program_y: AccountInfo<'info>,
 
 
     /// CHECK:
@@ -157,14 +158,6 @@ pub struct ProxyMultiSwap<'info> {
     #[account(mut)]
     pub input_token_account: Box<InterfaceAccount<'info, TokenAccount>>,
 
-    /// The user token account for output token
-    // #[account(
-    //     init_if_needed, 
-    //     payer = payer,
-    //     associated_token::mint = output_vault_mint,
-    //     associated_token::authority = payer,
-    //     associated_token::token_program = token_program
-    // )]
     #[account(mut)]
     pub output_token_account: Box<InterfaceAccount<'info, TokenAccount>>,
 
@@ -219,13 +212,6 @@ pub struct ProxyMultiSwap<'info> {
 
     /// The user token account for output token02
     #[account(mut)]
-    // #[account(
-    //     init_if_needed, 
-    //     payer = payer,
-    //     associated_token::mint = output_vault_mint,
-    //     associated_token::authority = payer,
-    //     associated_token::token_program = token_program
-    // )]
     pub output_token_account02: Box<InterfaceAccount<'info, TokenAccount>>,
 
     /// The vault token account for input token
@@ -273,7 +259,6 @@ pub struct ProxyMultiSwap<'info> {
 
 }
 
-
 pub fn proxy_swap<'c: 'info, 'info>(
     ctx: &mut ProxySwap<'info>,
     remaining_accounts: &'c [AccountInfo<'info>],
@@ -289,6 +274,12 @@ pub fn proxy_swap<'c: 'info, 'info>(
     // other_amount_threshold
     require!(other_amount_threshold > 0, ErrorCode::ThresholdAmountCannotBeZero);
 
+    let mut token_program_x = ctx.token_program.to_account_info();
+
+    if token_program_x.key() != ctx.input_token_account.to_account_info().owner.key() {
+        token_program_x = ctx.token_program_2022.to_account_info();
+    }
+
     let cpi_accounts = CollectFee{
         admin_info: ctx.bkswap_admin_info.to_account_info(),
         fee_to_token_account: ctx.fee_to_token_account.to_account_info(),
@@ -297,7 +288,7 @@ pub fn proxy_swap<'c: 'info, 'info>(
         user_owner: ctx.payer.to_account_info(),
         
         mint: ctx.input_vault_mint.to_account_info(),
-        token_program_x: ctx.token_program_x.to_account_info(),
+        token_program_x: token_program_x,
         system_program: ctx.system_program.to_account_info()
     };
 
@@ -364,17 +355,14 @@ pub fn proxy_multi_swap<'a, 'b, 'c: 'info, 'info>(
     // other_amount_threshold
     require!(other_amount_threshold02 > 0, ErrorCode::ThresholdAmountCannotBeZero);
 
-    let old_balance_out_token = ctx.accounts.output_token_account.amount;
-    msg!("old_balance_out_token: {:?}", old_balance_out_token);
-
 
     let first_swap_remaining_accounts: &[AccountInfo<'info>] = &ctx.remaining_accounts[..swap_remaining_accounts_num as usize];
     let second_swap_remaining_accounts: &[AccountInfo<'info>] = &ctx.remaining_accounts[swap_remaining_accounts_num as usize..];
 
-    let mut token_program_x = ctx.accounts.token_program.to_account_info();
+    let mut token_program_y = ctx.accounts.token_program.to_account_info();
 
-    if token_program_x.key() != spl_token::ID {
-        token_program_x = ctx.accounts.token_program_2022.to_account_info();
+    if token_program_y.key() != ctx.accounts.output_token_account.to_account_info().owner.key() {
+        token_program_y = ctx.accounts.token_program_2022.to_account_info();
     }
 
     let mut swap_accounts = ProxySwap {
@@ -390,7 +378,7 @@ pub fn proxy_multi_swap<'a, 'b, 'c: 'info, 'info>(
         observation_state: ctx.accounts.observation_state.clone(),
         token_program: ctx.accounts.token_program.clone(),
         token_program_2022: ctx.accounts.token_program_2022.clone(),
-        token_program_x: token_program_x,
+        token_program_y: token_program_y,
         memo_program: ctx.accounts.memo_program.clone(),
         input_vault_mint: ctx.accounts.input_vault_mint.clone(),
         output_vault_mint: ctx.accounts.output_vault_mint.clone(),
