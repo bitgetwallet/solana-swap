@@ -47,8 +47,8 @@ pub fn collect_fee(
     let admin_info = &mut ctx.accounts.admin_info;
     require!(!admin_info.is_paused, ErrorCode::ProtocolPaused); 
     require!(ctx.accounts.user_owner.key() != Pubkey::default(), ErrorCode::UserCannotBeZeroAddress);
-    require!(amount > 0 , ErrorCode::AmountCannotBeZero);
-    require!(amount + prededuct_amount <= ctx.accounts.user_source_token_account.amount, ErrorCode::AmountOverBalance);
+    require!(amount > prededuct_amount, ErrorCode::AmountNeedGtPredeductAmount);
+    require!(amount <= ctx.accounts.user_source_token_account.amount, ErrorCode::AmountOverBalance);
 
     require!(
         admin_info.min_fee_rate_limit <= fee_rate && fee_rate <= admin_info.max_fee_rate_limit, ErrorCode::FeeRateTooLowOrTooHigh
@@ -70,7 +70,6 @@ pub fn collect_fee(
     let token_program_info = ctx.accounts.token_program_x.to_account_info();
     let user_ata_info = ctx.accounts.user_source_token_account.to_account_info();
     let mint = ctx.accounts.mint.to_account_info();
-    let mint_ptr = &ctx.accounts.mint;
     let user_owner_info = ctx.accounts.user_owner.to_account_info();
     let user_ata_owner = *user_ata_info.owner;
 
@@ -81,8 +80,8 @@ pub fn collect_fee(
         transfer_amounts.push(prededuct_amount);
         transfer_destinations.push(ctx.accounts.prededuct_to_token_account.to_account_info());
     }
-
-    let mut fee_amount: u64 = ((amount as u128) * (fee_rate as u128) / PROTOCOL_FEE_RATE_MUL_VALUE).try_into().unwrap();
+    let amount_in = amount.checked_sub(prededuct_amount).ok_or(ErrorCode::ArithmeticError)?;
+    let mut fee_amount: u64 = ((amount_in as u128) * (fee_rate as u128) / PROTOCOL_FEE_RATE_MUL_VALUE).try_into().unwrap();
     if !ctx.accounts.admin_info.users.contains(&ctx.accounts.user_owner.key()) {
         transfer_amounts.push(fee_amount);
         transfer_destinations.push(ctx.accounts.fee_to_token_account.to_account_info());
@@ -105,7 +104,7 @@ pub fn collect_fee(
                     },
                 ),
                 *amount,
-                mint_ptr.decimals,
+                ctx.accounts.mint.decimals,
             )?;
         } else {
             token::transfer(
@@ -122,5 +121,5 @@ pub fn collect_fee(
         }
     }
 
-    Ok(amount - fee_amount)
+    Ok(amount_in - fee_amount)
 }
