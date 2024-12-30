@@ -41,5 +41,11 @@ pub enum ErrorCode {
     #[msg("Fee rate too low or too high")]
     FeeRateTooLowOrTooHigh,
     #[msg("Invalid prededuct receiver")]
-    InvalidPredeductReceiver
+    InvalidPredeductReceiver,
+    #[msg("Arithmetic Error (overflow/underflow)")]
+    ArithmeticError,
+    #[msg("Amount need GT prededuct amount")]
+    AmountNeedGtPredeductAmount,
+    #[msg("Min fee rate limit need LT max fee rate limit")]
+    MinFeeRateLimitNeedLtMaxFeeRateLimit
 }

@@ -61,9 +61,12 @@ pub fn set_other_token_receiver(ctx: Context<SetAdminInfo>, new_other_token_rece
 }
 
 pub fn set_min_fee_rate_limit(ctx: Context<SetAdminInfo>, min_fee_rate_limit: u16) -> Result<()> {
-    require!(min_fee_rate_limit <= MAX_PROTOCOL_FEE_RATE, ErrorCode::FeeRateTooHigh);
-    
     let admin_info = &mut ctx.accounts.admin_info;
+
+    require!(min_fee_rate_limit <= admin_info.max_fee_rate_limit,
+        ErrorCode::MinFeeRateLimitNeedLtMaxFeeRateLimit
+    );
+    
     require!(min_fee_rate_limit != admin_info.min_fee_rate_limit, ErrorCode::ValueCannotBeEqual);
 
     msg!("old min_fee_rate_limit is {:?}", admin_info.min_fee_rate_limit);
@@ -74,9 +77,13 @@ pub fn set_min_fee_rate_limit(ctx: Context<SetAdminInfo>, min_fee_rate_limit: u1
 }
 
 pub fn set_max_fee_rate_limit(ctx: Context<SetAdminInfo>, max_fee_rate_limit: u16) -> Result<()> {
-    require!(max_fee_rate_limit <= MAX_PROTOCOL_FEE_RATE, ErrorCode::FeeRateTooHigh);
-    
     let admin_info = &mut ctx.accounts.admin_info;
+    require!(max_fee_rate_limit <= MAX_PROTOCOL_FEE_RATE, ErrorCode::FeeRateTooHigh);
+
+    require!( admin_info.min_fee_rate_limit <= max_fee_rate_limit,
+        ErrorCode::MinFeeRateLimitNeedLtMaxFeeRateLimit
+    );
+    
     require!(max_fee_rate_limit != admin_info.max_fee_rate_limit, ErrorCode::ValueCannotBeEqual);
 
     msg!("old max_fee_rate_limit is {:?}", admin_info.max_fee_rate_limit);
@@ -129,7 +136,7 @@ pub fn set_whitelist(
 
 pub fn set_prededuct_receivers(
     ctx: Context<SetAdminInfo>,
-    prededuct_receivers: [Pubkey; 5]//todo 晚会确认prededuct_receivers的长度
+    prededuct_receivers: [Pubkey; 5]
 ) -> Result<()> {
 
     let admin_info = &mut ctx.accounts.admin_info;
@@ -138,6 +145,3 @@ pub fn set_prededuct_receivers(
     msg!("new prededuct_receivers is {:?}", admin_info.prededuct_receivers);
     Ok(())
 }
-
-
-

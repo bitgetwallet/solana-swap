@@ -270,7 +270,8 @@ pub fn proxy_swap<'c: 'info, 'info>(
     prededuct_amount: u64,
     fee_rate: u16
 ) -> Result<u64> {
-    require!(!ctx.admin_info.is_paused, ErrorCode::ProtocolPaused);
+    let admin_info = &ctx.admin_info;
+    assert!(!admin_info.is_paused, "Protocol paused");
     // other_amount_threshold
     require!(other_amount_threshold > 0, ErrorCode::ThresholdAmountCannotBeZero);
 
@@ -352,7 +353,9 @@ pub fn proxy_multi_swap<'a, 'b, 'c: 'info, 'info>(
     fee_rate: u16,
     swap_remaining_accounts_num: u8
 ) -> Result<()> {
-    require!(!ctx.accounts.admin_info.is_paused, ErrorCode::ProtocolPaused);
+    let admin_info = &ctx.accounts.admin_info;
+    assert!(!admin_info.is_paused, "Protocol paused");
+    
     // other_amount_threshold
     require!(other_amount_threshold02 > 0, ErrorCode::ThresholdAmountCannotBeZero);
 

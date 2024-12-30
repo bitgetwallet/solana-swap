@@ -1,5 +1,4 @@
 use anchor_lang::prelude::*;
-
 use crate::consts::*;
 use crate::state::*;
 use crate::errors::ErrorCode;
@@ -45,7 +44,8 @@ pub fn collect_fee(
     fee_rate: u16
 ) -> Result<u64> {
     let admin_info = &mut ctx.accounts.admin_info;
-    require!(!admin_info.is_paused, ErrorCode::ProtocolPaused); 
+    require!(!admin_info.is_paused, ErrorCode::ProtocolPaused);
+
     require!(ctx.accounts.user_owner.key() != Pubkey::default(), ErrorCode::UserCannotBeZeroAddress);
     require!(amount > prededuct_amount, ErrorCode::AmountNeedGtPredeductAmount);
     require!(amount <= ctx.accounts.user_source_token_account.amount, ErrorCode::AmountOverBalance);
@@ -76,11 +76,12 @@ pub fn collect_fee(
     // Collect all transfer amounts and destinations
     let mut transfer_amounts: Vec<u64> = vec![];
     let mut transfer_destinations: Vec<AccountInfo<'_>> = vec![];
+    let mut amount_in = amount;
     if prededuct_amount > 0 {
         transfer_amounts.push(prededuct_amount);
         transfer_destinations.push(ctx.accounts.prededuct_to_token_account.to_account_info());
+        amount_in = amount.checked_sub(prededuct_amount).ok_or(ErrorCode::ArithmeticError)?;
     }
-    let amount_in = amount.checked_sub(prededuct_amount).ok_or(ErrorCode::ArithmeticError)?;
     let mut fee_amount: u64 = ((amount_in as u128) * (fee_rate as u128) / PROTOCOL_FEE_RATE_MUL_VALUE).try_into().unwrap();
     if !ctx.accounts.admin_info.users.contains(&ctx.accounts.user_owner.key()) {
         transfer_amounts.push(fee_amount);

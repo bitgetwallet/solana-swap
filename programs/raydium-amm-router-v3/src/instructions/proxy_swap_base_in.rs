@@ -404,6 +404,9 @@ pub fn proxy_swap_base_in(
     prededuct_amount: u64,
     fee_rate: u16,
 ) -> Result<u64> {
+    
+    let admin_info = &ctx.accounts.admin_info;
+    assert!(!admin_info.is_paused, "Protocol paused");
 
     let cpi_accounts = CollectFee{
         admin_info: ctx.accounts.bkswap_admin_info.to_account_info(),
@@ -449,6 +452,8 @@ pub fn proxy_route_swap_base_in(
     prededuct_amount: u64,
     fee_rate: u16,
 ) -> Result<u64> {
+    let admin_info = &ctx.accounts.admin_info;
+    assert!(!admin_info.is_paused, "Protocol paused");
 
     let cpi_accounts = CollectFee{
         admin_info: ctx.accounts.bkswap_admin_info.to_account_info(),
@@ -495,6 +500,9 @@ pub fn proxy_route_swap_out(
     ctx: Context<ProxyRouteSwapOut>,
     minimum_amount_out: u64
 ) -> Result<u64> {
+    let admin_info = &ctx.accounts.admin_info;
+    assert!(!admin_info.is_paused, "Protocol paused");
+
     let amount_out_pda = &ctx.accounts.amount_out_pda;
     let amount_in02 = amount_out_pda.amount_out;
 
@@ -509,3 +517,5 @@ pub fn proxy_route_swap_out(
     Ok(amount_out)
 
 }
+
+
