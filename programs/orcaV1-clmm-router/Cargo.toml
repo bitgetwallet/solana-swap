@@ -1,0 +1,30 @@
+# [workspace]
+# resolver = "2"
+
+[package]
+name = "orcaV1-clmm-router"
+version = "0.1.0"
+description = "Created with Anchor"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "orca_v1_clmm_router"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+solana-program = ">=1.16, <1.18"
+anchor-lang = "=0.29.0"
+anchor-spl = "=0.29.0"
+spl-memo = "=4.0.0"
+ahash = "=0.8.6"
+spl-token = "=4.0.0" 
+
+whirlpool-cpi = { git = "https://github.com/orca-so/whirlpool-cpi", rev = "9deec10" }
+bkswapv2 = { path = "../bkswap-v2", features = ["cpi"] }
